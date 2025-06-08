@@ -257,12 +257,10 @@
        </svg>
      </div>
    </div>
-   <!-- Audio caché pour la musique Rainbow Kitten Surprise -->
-   <audio id="rainbowAudio" preload="auto">
-     <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b2e7e2.mp3" type="audio/mpeg">
-     <!-- Remplacez le lien ci-dessus par le meilleur morceau de Rainbow Kitten Surprise si vous avez un lien mp3 direct -->
-     
-   </audio>
+   <!-- Spotify embed pour la nouvelle chanson -->
+   <div class="flex justify-center mt-8 xs:mt-5">
+     <iframe id="spotifyFrame" style="border-radius:12px" src="https://open.spotify.com/embed/track/5VJe8OKFcPBBjNEAPUeDuJ?utm_source=generator" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+   </div>
    <!-- Hidden modal for the birthday message -->
    <div id="bdModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg">
      <div class="flex items-center justify-center min-h-screen px-2">
@@ -489,52 +487,51 @@
       container.innerHTML = '';
     }
 
-    // Gestion de la musique Rainbow Kitten Surprise
-    let rainbowAudio = document.getElementById('rainbowAudio');
-    let audioStarted = false;
+    // Pas d'élément audio, l'iframe Spotify est utilisée à la place
 
-    // Afficher la modal en cliquant sur le cœur + lancer les étoiles/cœurs + démarrer la musique
+    // Fonction pour démarrer automatiquement la musique Spotify
+    function playSpotify() {
+      // On remplace l'iframe par une nouvelle avec autoplay=1 dans l'URL
+      var iframe = document.getElementById('spotifyFrame');
+      if (!iframe) return;
+      // Vérifier si déjà autoplay
+      if (iframe.src.indexOf('autoplay=1') !== -1) return;
+      // On ajoute autoplay=1 à l'URL
+      let src = iframe.src;
+      if (src.indexOf('?') === -1) {
+        src += '?autoplay=1';
+      } else if (src.indexOf('autoplay=1') === -1) {
+        src += '&autoplay=1';
+      }
+      // Remplacer l'iframe pour forcer le rechargement
+      var newIframe = iframe.cloneNode(true);
+      newIframe.src = src;
+      iframe.parentNode.replaceChild(newIframe, iframe);
+    }
+
+    // Afficher la modal au clic sur le cœur + lancer la pluie d'étoiles/cœurs + démarrer Spotify
     document.getElementById('heartBtn').onclick = function() {
       document.getElementById('bdModal').classList.remove('hidden');
       document.getElementById('bdModal').classList.add('flex');
       launchFallingStarsAndHeartsContinuous();
-      // Démarrer la musique si ce n'est pas déjà en cours
-      if (rainbowAudio) {
-        // Pour certains navigateurs, il faut relancer à chaque fois
-        rainbowAudio.currentTime = 0;
-        rainbowAudio.play().catch(function(e){
-          // Certains navigateurs bloquent l'autoplay, on peut afficher un message si besoin
-          // alert("Cliquez pour activer la musique !");
-        });
-        audioStarted = true;
-      }
+      playSpotify();
     };
     // Fermer la modal
     document.getElementById('closeModal').onclick = function() {
       document.getElementById('bdModal').classList.add('hidden');
       document.getElementById('bdModal').classList.remove('flex');
       stopFallingStarsAndHearts();
-      // Mettre la musique en pause
-      if (rainbowAudio && !rainbowAudio.paused) {
-        rainbowAudio.pause();
-        rainbowAudio.currentTime = 0;
-      }
     };
-    // Fermer la modal si on clique à l'extérieur
+    // Fermer la modal si clic à l'extérieur
     document.getElementById('bdModal').addEventListener('click', function(e) {
       if (e.target === this) {
         this.classList.add('hidden');
         this.classList.remove('flex');
         stopFallingStarsAndHearts();
-        // Mettre la musique en pause
-        if (rainbowAudio && !rainbowAudio.paused) {
-          rainbowAudio.pause();
-          rainbowAudio.currentTime = 0;
-        }
       }
     });
 
-    // Optional: Adjust modal vertical margin for mobile
+    // Optionnel : ajuster la marge verticale de la modal sur mobile
     function adjustModalMargin() {
       const modal = document.getElementById('bdModal');
       if (!modal) return;
@@ -546,6 +543,19 @@
     }
     window.addEventListener('resize', adjustModalMargin);
     window.addEventListener('DOMContentLoaded', adjustModalMargin);
+
+    // --- DÉBUT AJOUT POUR LANCER LA MUSIQUE AUTOMATIQUEMENT AU CHARGEMENT ---
+
+    // On tente de démarrer la musique dès que possible
+    window.addEventListener('DOMContentLoaded', function() {
+      // Petite temporisation pour s'assurer que l'iframe est bien présente
+      setTimeout(function() {
+        playSpotify();
+      }, 300);
+    });
+
+    // --- FIN AJOUT ---
+
   </script>
  </body>
 </html>
